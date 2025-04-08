@@ -1,0 +1,219 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
+
+/* Estilos básicos */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'IM Fell French Canon', serif;
+    background-color: white;
+    color: black;
+    overflow-x: auto;
+}
+
+/* 🔹 Sección Intro */
+#intro {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 100;
+    transition: opacity 4s ease-in-out !important;
+}
+
+
+#intro video {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.intro-title {
+    position: absolute;
+    font-size: 6rem;
+    padding: 10px 20px;
+    border-radius: 10px;
+    color: black;
+    opacity: 0; /* Inicialmente invisible */
+    transition: opacity 12s ease-in-out !important; /* Para asegurar que funcione */
+}
+
+.hidden {
+    display: none;
+}
+
+/* 🔹 Cabecera */
+header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 1) !important; /* Elimina transparencia */
+    z-index: 10;
+}
+
+.logo {
+    font-size: 1.5rem;
+    position: absolute;
+    top: 30px;
+    right: 70px;
+}
+
+.info-btn, .close-info {
+    font-size: 2rem;
+    background: none;
+    border: none;
+    color: black;
+    cursor: pointer;
+    position: absolute;
+    top: 20px;
+
+}
+
+.info-btn {
+    left: 25px;
+    z-index: 30;
+}
+
+/* 🔹 Panel de información */
+.info-panel {
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 37%;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.9);
+    color: black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: left 0.5s ease;
+    z-index: 20;
+    padding: 30px;
+}
+
+.info-panel.active {
+    left: 0;
+}
+
+.close-info {
+    left: 20px;
+}
+
+/* 🔹 Galería */
+.gallery-container {
+    position: relative;
+    transform: translateY(-50%);
+    top: 50vh;
+    width: 100vw;
+    height: 100vh;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    z-index: 5;
+}
+
+.gallery {
+    display: flex;
+    margin-top: 200px; /* Añade espacio arriba si lo necesitas */
+    gap: 45px;
+    padding: 30px;
+    height: 69vh;
+
+
+}
+
+.image {
+    flex: 0 0 auto;
+    height: 100%;
+    width: auto;
+    position: relative;
+    scroll-snap-align: center; /* Centra mejor cada imagen */
+}
+
+.image-transition-wrapper {
+    flex: 0 0 auto;
+    height: auto;
+    min-width: 200px; /* O el ancho mínimo que prefieras */
+    width: auto; 
+    position: relative;
+    scroll-snap-align: center;
+    overflow: hidden; /* Evita desbordes si el ancho se ajusta */
+
+}
+
+.image img {
+    height: 100%;
+    width: auto;
+    object-fit: contain;
+}
+
+.image-transition-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+
+.image-transition-wrapper img {
+    width: max-content; /* Se ajusta al contenido */
+    max-width: 100%; /* Evita que sea más grande que el contenedor padre */
+    height: auto;
+    position: absolute;
+    opacity: 0;
+
+}
+
+.image-transition-wrapper img.active {
+    opacity: 1;
+}
+
+/* Estilos del cursor personalizado */
+#custom-cursor {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: black;
+    pointer-events: none;
+    z-index: 99999;
+    transform: translate(-50%, -50%);
+    mix-blend-mode: difference;
+    transition: transform 0.1s ease, width 0.3s ease, height 0.3s ease;
+    will-change: transform;
+}
+
+/* Cambiar color del cursor cuando está sobre elementos oscuros */
+.dark-background #custom-cursor {
+    background-color: white;
+}
+
+
+/* Escalar el cursor cuando está sobre elementos interactivos */
+button:hover ~ #custom-cursor,
+a:hover ~ #custom-cursor,
+.image:hover ~ #custom-cursor,
+.image-transition-wrapper:hover ~ #custom-cursor
+.logo:hover ~ #custom-cursor {
+    transform: translate(-50%, -50%) scale(1.5);
+}
+
+
+html, body, a, button, .image, .image-transition-wrapper, .intro-title, .info-panel, .info-panel.active, #intro, header, .gallery{
+    cursor: none !important;
+}
