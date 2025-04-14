@@ -134,7 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         cloneImages.forEach(img => img.classList.remove('active'));
                         cloneImages[currentIndex].classList.add('active');
                     });
-                }, 1000); // Cambiado a 3 segundos para mejor experiencia
+                }, 1200); // Cambiado a 3 segundos para mejor experiencia
             }
         });
     };
