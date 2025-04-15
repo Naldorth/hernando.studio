@@ -130,10 +130,10 @@ header {
 
 .gallery {
     display: flex;
-    margin-top: 200px; /* Añade espacio arriba si lo necesitas */
-    gap: 45px;
+    margin-top: 160px; /* Añade espacio arriba si lo necesitas */
+    gap: 20px;
     padding: 30px;
-    height: 69vh;
+    height: 75vh;
 
 
 }
