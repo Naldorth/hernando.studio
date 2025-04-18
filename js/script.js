@@ -8,6 +8,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const closeInfo = document.getElementById("close-info");
     const introTitle = document.querySelector(".intro-title");
     const customCursor = document.getElementById('custom-cursor');
+    const gallery = document.querySelector(".gallery");
+    
+    // Add gallery initialization classes
+    if (gallery) {
+        gallery.classList.add('gallery-initializing');
+    }
 
     // Función para mostrar el título con fade-in
     const showTitle = () => {
@@ -25,6 +31,8 @@ document.addEventListener("DOMContentLoaded", () => {
             setTimeout(() => {
                 intro.style.display = "none";
                 mainContent.classList.remove("hidden");
+                // Force gallery recalculation when main content becomes visible
+                setTimeout(initializeGallery, 100);
             }, 800);
         }
     };
@@ -134,7 +142,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         cloneImages.forEach(img => img.classList.remove('active'));
                         cloneImages[currentIndex].classList.add('active');
                     });
-                }, 1200); // Cambiado a 3 segundos para mejor experiencia
+                }, 1200); // Cambiado a 1.2 segundos
             }
         });
     };
@@ -167,44 +175,80 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const waitForImages = () => {
-        let images = document.querySelectorAll(".image.static img");
+        if (!gallery) return;
+        
+        let images = document.querySelectorAll(".image img, .image-transition-wrapper img");
         let loaded = 0;
+        let totalImages = images.length;
+        
+        if (totalImages === 0) {
+            activateGallery();
+            return;
+        }
 
-        const checkAllLoaded = () => {
-            if (loaded === images.length) {
+        const imageLoaded = () => {
+            loaded++;
+            if (loaded === totalImages) {
                 adjustWidth();
+                activateGallery();
                 forceResize();
             }
         };
 
         images.forEach(img => {
             if (img.complete) {
-                loaded++;
-                checkAllLoaded();
+                imageLoaded();
             } else {
-                img.addEventListener("load", () => {
-                    loaded++;
-                    checkAllLoaded();
-                });
+                img.addEventListener("load", imageLoaded);
+                // Add error handling to avoid waiting forever
+                img.addEventListener("error", imageLoaded);
             }
         });
 
-        if (loaded === images.length) {
-            adjustWidth();
-            forceResize();
-        }
+        // Safety timeout in case some images never load
+        setTimeout(() => {
+            if (loaded < totalImages) {
+                console.log(`Only ${loaded}/${totalImages} images loaded, activating gallery anyway`);
+                adjustWidth();
+                activateGallery();
+                forceResize();
+            }
+        }, 3000);
+    };
+
+    const activateGallery = () => {
+        if (!gallery) return;
+        
+        // Make sure the gallery has the correct height now that images are loaded
+        const galleryHeight = window.innerHeight * 0.75; // 75vh
+        gallery.style.height = `${galleryHeight}px`;
+        
+        // Remove initializing class and add ready class
+        gallery.classList.remove('gallery-initializing');
+        gallery.classList.add('gallery-ready');
     };
 
     const forceResize = () => {
-        setTimeout(() => {
+        // Trigger resize events to ensure layout calculations
+        window.dispatchEvent(new Event("resize"));
+        
+        // Use requestAnimationFrame for smoother timing with the browser's render cycle
+        requestAnimationFrame(() => {
             window.dispatchEvent(new Event("resize"));
-        }, 50);
+            
+            // One final resize after everything else has processed
+            setTimeout(() => {
+                window.dispatchEvent(new Event("resize"));
+            }, 100);
+        });
     };
 
     // NUEVA VERSIÓN MEJORADA DE LA GALERÍA
     const setupGallery = () => {
-        const gallery = document.querySelector(".gallery");
         if (!gallery) return;
+
+        // Keep gallery hidden during setup
+        gallery.classList.add('gallery-initializing');
 
         // Limpiar clones antiguos
         document.querySelectorAll('.gallery > .clone').forEach(el => el.remove());
@@ -219,7 +263,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         // Crear clones (5 copias para efecto infinito)
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 20; i++) {
             originals.forEach(item => {
                 const clone = item.cloneNode(true);
                 clone.classList.remove('original');
@@ -238,7 +282,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
-        // Drag and Scroll (manteniendo tu código original)
+        // Drag and Scroll
         let isDragging = false;
         let startX;
         let scrollLeft;
@@ -269,6 +313,32 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     };
 
+    // New function to initialize gallery with proper dimensions
+    const initializeGallery = () => {
+        if (!gallery) return;
+        
+        // Set initial dimensions explicitly based on viewport
+        const galleryContainerHeight = window.innerHeight;
+        const galleryHeight = galleryContainerHeight * 0.75; // 75vh
+        
+        document.querySelector('.gallery-container').style.height = `${galleryContainerHeight}px`;
+        gallery.style.height = `${galleryHeight}px`;
+        
+        // Setup gallery structure
+        setupGallery();
+        
+        // Make sure images are properly sized
+        document.querySelectorAll('.image, .image-transition-wrapper').forEach(item => {
+            item.style.height = `${galleryHeight}px`;
+        });
+        
+        // Force layout recalculation
+        forceResize();
+        
+        // Wait for images and continue initialization
+        waitForImages();
+    };
+
     const initEventHandlers = () => {
         if (intro) {
             intro.addEventListener("click", hideIntro);
@@ -287,29 +357,69 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
-        window.addEventListener("load", waitForImages);
-        window.addEventListener("resize", adjustWidth);
+        // Handle window resize events
+        window.addEventListener("resize", () => {
+            adjustWidth();
+            
+            // Update gallery height on resize
+            if (gallery) {
+                const galleryHeight = window.innerHeight * 0.75; // 75vh
+                gallery.style.height = `${galleryHeight}px`;
+                
+                document.querySelectorAll('.image, .image-transition-wrapper').forEach(item => {
+                    item.style.height = `${galleryHeight}px`;
+                });
+            }
+        });
+        
+        // Handle orientation change events specifically
+        window.addEventListener("orientationchange", () => {
+            setTimeout(() => {
+                initializeGallery();
+            }, 200);
+        });
     };
 
-    // Inicialización
-    handleVideoAutoplay();
-    initEventHandlers();
-    setupGallery();
-    waitForImages();
-    setupCustomCursor(); // Inicializar el cursor personalizado
+    // Main init function to ensure proper sequence
+    const init = () => {
+        handleVideoAutoplay();
+        setupCustomCursor();
+        initEventHandlers();
+        
+        // If intro is not present or hidden, initialize gallery immediately
+        if (!intro || getComputedStyle(intro).display === 'none') {
+            initializeGallery();
+        }
+        
+        // Set up transitions after everything else
+        setTimeout(setupImageTransitions, 1500);
+    };
+
+    // Start initialization
+    init();
     
-    // Iniciar transiciones después de que todo esté listo
-    setTimeout(() => {
-        setupImageTransitions();
-    }, 1000);
+    // Fallback initialization after the window load event
+    window.addEventListener('load', () => {
+        // Re-initialize if gallery isn't visible yet
+        if (gallery && gallery.classList.contains('gallery-initializing')) {
+            console.log("Fallback gallery initialization");
+            initializeGallery();
+        }
+    });
 });
 
+// Fix for global mousemove event
 document.addEventListener('mousemove', (e) => {
-    customCursor.style.left = `${e.clientX}px`;
-    customCursor.style.top = `${e.clientY}px`;
+    const customCursor = document.getElementById('custom-cursor');
+    if (customCursor) {
+        customCursor.style.left = `${e.clientX}px`;
+        customCursor.style.top = `${e.clientY}px`;
+    }
 
     // Mover el cursor de respaldo (fallback)
     const fallbackCursor = document.getElementById('cursor-fallback');
-    fallbackCursor.style.left = `${e.clientX}px`;
-    fallbackCursor.style.top = `${e.clientY}px`;
+    if (fallbackCursor) {
+        fallbackCursor.style.left = `${e.clientX}px`;
+        fallbackCursor.style.top = `${e.clientY}px`;
+    }
 });

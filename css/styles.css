@@ -7,7 +7,6 @@
     padding: 0;
 }
 
-
 body {
     margin: 0;
     padding: 0;
@@ -15,6 +14,7 @@ body {
     background-color: white;
     color: black;
     overflow-x: auto;
+    cursor: auto !important; /* Changed from none to auto */
 }
 
 /* 🔹 Sección Intro */
@@ -25,11 +25,10 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    cursor: pointer;
+    cursor: none !important;
     z-index: 100;
     transition: opacity 4s ease-in-out !important;
 }
-
 
 #intro video {
     position: absolute;
@@ -44,15 +43,16 @@ body {
     padding: 10px 20px;
     border-radius: 10px;
     color: black;
-    opacity: 0; /* Inicialmente invisible */
-    transition: opacity 12s ease-in-out !important; /* Para asegurar que funcione */
+    opacity: 0;
+    transition: opacity 12s ease-in-out !important;
+    cursor: none !important;
 }
 
 .hidden {
     display: none;
 }
 
-/* 🔹 Cabecera */
+/* 🔹 Cabecera - Fixed with cursor support */
 header {
     position: fixed;
     top: 0;
@@ -61,8 +61,10 @@ header {
     justify-content: space-between;
     align-items: center;
     padding: 20px;
-    background-color: rgba(255, 255, 255, 1) !important; /* Elimina transparencia */
+    background-color: rgba(255, 255, 255, 1);
     z-index: 10;
+    pointer-events: none !important; /* Crucial fix */
+    cursor: none !important;
 }
 
 .logo {
@@ -70,6 +72,9 @@ header {
     position: absolute;
     top: 30px;
     right: 70px;
+    cursor: none !important;
+    pointer-events: auto !important;
+  
 }
 
 .info-btn, .close-info {
@@ -77,10 +82,11 @@ header {
     background: none;
     border: none;
     color: black;
-    cursor: pointer;
+    cursor: none !important;
     position: absolute;
     top: 20px;
-
+    pointer-events: auto !important;
+    z-index: 11;
 }
 
 .info-btn {
@@ -103,6 +109,7 @@ header {
     transition: left 0.5s ease;
     z-index: 20;
     padding: 30px;
+    cursor: none !important;
 }
 
 .info-panel.active {
@@ -126,16 +133,16 @@ header {
     scroll-snap-type: x mandatory;
     scroll-behavior: smooth;
     z-index: 5;
+    cursor: none !important;
 }
 
 .gallery {
     display: flex;
-    margin-top: 160px; /* Añade espacio arriba si lo necesitas */
+    margin-top: 160px;
     gap: 20px;
     padding: 30px;
     height: 75vh;
-
-
+    cursor: none !important;
 }
 
 .image {
@@ -143,18 +150,19 @@ header {
     height: 100%;
     width: auto;
     position: relative;
-    scroll-snap-align: center; /* Centra mejor cada imagen */
+    scroll-snap-align: center;
+    cursor: none !important;
 }
 
 .image-transition-wrapper {
     flex: 0 0 auto;
     height: auto;
-    min-width: 200px; /* O el ancho mínimo que prefieras */
+    min-width: 200px;
     width: auto; 
     position: relative;
     scroll-snap-align: center;
-    overflow: hidden; /* Evita desbordes si el ancho se ajusta */
-
+    overflow: hidden;
+    cursor: none !important;
 }
 
 .image img {
@@ -167,23 +175,22 @@ header {
     display: flex;
     justify-content: center;
     align-items: center;
-
 }
 
 .image-transition-wrapper img {
-    width: max-content; /* Se ajusta al contenido */
-    max-width: 100%; /* Evita que sea más grande que el contenedor padre */
+    width: max-content;
+    max-width: 100%;
     height: auto;
     position: absolute;
     opacity: 0;
-
+    cursor: none !important;
 }
 
 .image-transition-wrapper img.active {
     opacity: 1;
 }
 
-/* Estilos del cursor personalizado */
+/* Estilos del cursor personalizado - Fixed version */
 #custom-cursor {
     position: fixed;
     width: 10px;
@@ -201,19 +208,24 @@ header {
 /* Cambiar color del cursor cuando está sobre elementos oscuros */
 .dark-background #custom-cursor {
     background-color: white;
+    cursor: none !important;
 }
 
-
-/* Escalar el cursor cuando está sobre elementos interactivos */
+/* Escalar el cursor cuando está sobre elementos interactivos - Fixed selector */
 button:hover ~ #custom-cursor,
 a:hover ~ #custom-cursor,
 .image:hover ~ #custom-cursor,
-.image-transition-wrapper:hover ~ #custom-cursor
-.logo:hover ~ #custom-cursor {
+.image-transition-wrapper:hover ~ #custom-cursor,
+.logo:hover ~ #custom-cursor,
+button:hover + #custom-cursor,
+a:hover + #custom-cursor,
+.image:hover + #custom-cursor,
+.image-transition-wrapper:hover + #custom-cursor,
+.logo:hover + #custom-cursor {
     transform: translate(-50%, -50%) scale(1.5);
 }
 
-
-html, body, a, button, .image, .image-transition-wrapper, .intro-title, .info-panel, .info-panel.active, #intro, header, .gallery{
+/* Remove the problematic global cursor rule and replace with specific ones */
+a, button, .image, .image-transition-wrapper {
     cursor: none !important;
 }
