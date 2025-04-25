@@ -120,6 +120,23 @@ header {
     left: 20px;
 }
 
+.info-panel p.contact a,
+.info-panel p.contact a:visited {
+    color: rgb(122, 122, 122) !important;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.info-panel p.contact a:hover {
+    color: black;
+    text-decoration: underline;
+}
+
+.info-panel p {
+    margin-bottom: 1em; /* Espacio entre todos los párrafos */
+    line-height: 1.6; /* Mejora la legibilidad */
+}
+
 /* 🔹 Galería */
 .gallery-container {
     position: relative;
