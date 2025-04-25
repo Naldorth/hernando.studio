@@ -229,3 +229,20 @@ a:hover + #custom-cursor,
 a, button, .image, .image-transition-wrapper {
     cursor: none !important;
 }
+
+
+/* More specific selectors */
+.gallery::-webkit-scrollbar,
+.gallery-container .gallery::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+}
+
+.gallery,
+.gallery-container .gallery {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+}

@@ -1,4 +1,15 @@
 document.addEventListener("DOMContentLoaded", () => {
+    // Helper function for debouncing
+    function debounce(func, wait) {
+        let timeout;
+        return function() {
+            const context = this;
+            const args = arguments;
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(context, args), wait);
+        };
+    }
+
     // Elementos del DOM
     const intro = document.getElementById("intro");
     const mainContent = document.getElementById("main-content");
@@ -31,8 +42,11 @@ document.addEventListener("DOMContentLoaded", () => {
             setTimeout(() => {
                 intro.style.display = "none";
                 mainContent.classList.remove("hidden");
-                // Force gallery recalculation when main content becomes visible
-                setTimeout(initializeGallery, 100);
+                
+                // Delay gallery initialization to let the DOM stabilize
+                requestAnimationFrame(() => {
+                    setTimeout(initializeGallery, 300);
+                });
             }, 800);
         }
     };
@@ -62,13 +76,31 @@ document.addEventListener("DOMContentLoaded", () => {
     const setupCustomCursor = () => {
         if (!customCursor) return;
 
-        // Mover el cursor personalizado
+        // Mover el cursor personalizado - optimizado con requestAnimationFrame
+        let ticking = false;
+        let lastX = 0;
+        let lastY = 0;
+
         document.addEventListener('mousemove', (e) => {
-            customCursor.style.left = `${e.clientX}px`;
-            customCursor.style.top = `${e.clientY}px`;
-            
-            // Detectar si el elemento debajo es oscuro
-            const elementBelow = document.elementFromPoint(e.clientX, e.clientY);
+            lastX = e.clientX;
+            lastY = e.clientY;
+
+            if (!ticking) {
+                requestAnimationFrame(() => {
+                    customCursor.style.left = `${lastX}px`;
+                    customCursor.style.top = `${lastY}px`;
+                    
+                    // Detectar si el elemento debajo es oscuro - optimizado
+                    // Solo comprobamos esto cada 100ms para mejorar rendimiento
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
+
+        // Throttled element detection
+        setInterval(() => {
+            const elementBelow = document.elementFromPoint(lastX, lastY);
             if (elementBelow) {
                 const bgColor = window.getComputedStyle(elementBelow).backgroundColor;
                 const colorMatch = bgColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
@@ -79,14 +111,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     const b = parseInt(colorMatch[3]);
                     const isDark = r < 100 && g < 100 && b < 100;
                     
-                    if (isDark) {
-                        document.body.classList.add('dark-background');
-                    } else {
-                        document.body.classList.remove('dark-background');
-                    }
+                    document.body.classList.toggle('dark-background', isDark);
                 }
             }
-        });
+        }, 100);
 
         // Ocultar cursor personalizado cuando no se necesita
         document.addEventListener('mouseleave', () => {
@@ -109,7 +137,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     };
 
-    // NUEVA VERSIÓN MEJORADA DE LAS TRANSICIONES
+    // VERSIÓN MEJORADA DE LAS TRANSICIONES
     const setupImageTransitions = () => {
         const wrappers = document.querySelectorAll('.image-transition-wrapper.original');
         
@@ -135,14 +163,21 @@ document.addEventListener("DOMContentLoaded", () => {
                     currentIndex = (currentIndex + 1) % images.length;
                     images[currentIndex].classList.add('active');
                     
-                    // Sincronizar clones
-                    const clones = document.querySelectorAll(`.image-transition-wrapper.clone[data-original-id="${wrapper.dataset.wrapperId}"]`);
-                    clones.forEach(clone => {
-                        const cloneImages = clone.querySelectorAll('img');
-                        cloneImages.forEach(img => img.classList.remove('active'));
-                        cloneImages[currentIndex].classList.add('active');
+                    // Optimización: solo actualizar clones visibles
+                    const viewportHeight = window.innerHeight;
+                    const viewportWidth = window.innerWidth;
+                    
+                    document.querySelectorAll(`.image-transition-wrapper.clone[data-original-id="${wrapper.dataset.wrapperId}"]`).forEach(clone => {
+                        const rect = clone.getBoundingClientRect();
+                        // Only update if clone is visible (or close to viewport)
+                        if (rect.right >= -100 && rect.left <= viewportWidth + 100 && 
+                            rect.bottom >= -100 && rect.top <= viewportHeight + 100) {
+                            const cloneImages = clone.querySelectorAll('img');
+                            cloneImages.forEach(img => img.classList.remove('active'));
+                            cloneImages[currentIndex].classList.add('active');
+                        }
                     });
-                }, 1200); // Cambiado a 1.2 segundos
+                }, 1200);
             }
         });
     };
@@ -167,9 +202,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
             transitionWrappers.forEach(wrapper => {
                 wrapper.style.width = `${width}px`;
-                wrapper.style.display = "none";
-                void wrapper.offsetWidth;
-                wrapper.style.display = "";
+                // Avoid forced reflow by removing display manipulation
+                // wrapper.style.display = "none";
+                // void wrapper.offsetWidth;
+                // wrapper.style.display = "";
             });
         }
     };
@@ -185,35 +221,48 @@ document.addEventListener("DOMContentLoaded", () => {
             activateGallery();
             return;
         }
-
+        
+        // Activate gallery after just 30% of images load
+        const minLoadThreshold = Math.ceil(totalImages * 0.3);
+        let galleryActivated = false;
+        
         const imageLoaded = () => {
             loaded++;
-            if (loaded === totalImages) {
+            // Activate gallery early once minimum threshold is reached
+            if (!galleryActivated && loaded >= minLoadThreshold) {
+                galleryActivated = true;
                 adjustWidth();
                 activateGallery();
                 forceResize();
             }
         };
-
-        images.forEach(img => {
+        
+        images.forEach((img, index) => {
+            // Prioritize loading the first few visible images
+            if (index < 10) {
+                img.loading = "eager";
+            } else {
+                img.loading = "lazy";
+            }
+            
             if (img.complete) {
                 imageLoaded();
             } else {
                 img.addEventListener("load", imageLoaded);
-                // Add error handling to avoid waiting forever
                 img.addEventListener("error", imageLoaded);
             }
         });
-
-        // Safety timeout in case some images never load
+        
+        // Safety timeout reduced to 1.5 seconds
         setTimeout(() => {
-            if (loaded < totalImages) {
+            if (!galleryActivated) {
                 console.log(`Only ${loaded}/${totalImages} images loaded, activating gallery anyway`);
+                galleryActivated = true;
                 adjustWidth();
                 activateGallery();
                 forceResize();
             }
-        }, 3000);
+        }, 1500);
     };
 
     const activateGallery = () => {
@@ -229,21 +278,13 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const forceResize = () => {
-        // Trigger resize events to ensure layout calculations
-        window.dispatchEvent(new Event("resize"));
-        
-        // Use requestAnimationFrame for smoother timing with the browser's render cycle
+        // Use a single resize with requestAnimationFrame
         requestAnimationFrame(() => {
             window.dispatchEvent(new Event("resize"));
-            
-            // One final resize after everything else has processed
-            setTimeout(() => {
-                window.dispatchEvent(new Event("resize"));
-            }, 100);
         });
     };
 
-    // NUEVA VERSIÓN MEJORADA DE LA GALERÍA
+    // VERSIÓN MEJORADA DE LA GALERÍA CON LAZY LOADING
     const setupGallery = () => {
         if (!gallery) return;
 
@@ -262,55 +303,86 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
-        // Crear clones (5 copias para efecto infinito)
-        for (let i = 0; i < 20; i++) {
-            originals.forEach(item => {
-                const clone = item.cloneNode(true);
-                clone.classList.remove('original');
-                clone.classList.add('clone');
-                
-                if (item.classList.contains('image-transition-wrapper')) {
-                    clone.dataset.originalId = item.dataset.wrapperId;
-                    // Sincronizar imagen activa inicial
-                    const activeIndex = Array.from(item.querySelectorAll('img')).findIndex(img => img.classList.contains('active'));
-                    clone.querySelectorAll('img').forEach((img, idx) => {
-                        img.classList.toggle('active', idx === activeIndex);
-                    });
-                }
-                
-                gallery.appendChild(clone);
-            });
-        }
+        // Create clones in batches
+        const createClones = (count, startIndex = 0) => {
+            const fragment = document.createDocumentFragment();
+            
+            for (let i = startIndex; i < startIndex + count; i++) {
+                originals.forEach(item => {
+                    const clone = item.cloneNode(true);
+                    clone.classList.remove('original');
+                    clone.classList.add('clone');
+                    
+                    if (item.classList.contains('image-transition-wrapper')) {
+                        clone.dataset.originalId = item.dataset.wrapperId;
+                        const activeIndex = Array.from(item.querySelectorAll('img')).findIndex(img => img.classList.contains('active'));
+                        clone.querySelectorAll('img').forEach((img, idx) => {
+                            img.classList.toggle('active', idx === activeIndex);
+                        });
+                    }
+                    
+                    fragment.appendChild(clone);
+                });
+            }
+            
+            gallery.appendChild(fragment);
+        };
+        
+        // Create initial set of clones immediately (reduced count)
+        createClones(5);
+        
+        // Create remaining clones after gallery is visible in batches
+        let batchIndex = 5;
+        const createRemainingClones = () => {
+            if (batchIndex < 20) {
+                requestAnimationFrame(() => {
+                    createClones(3, batchIndex);
+                    batchIndex += 3;
+                    setTimeout(createRemainingClones, 100);
+                });
+            }
+        };
+        
+        setTimeout(createRemainingClones, 800);
 
-        // Drag and Scroll
+        // Optimized Drag and Scroll with passive events
         let isDragging = false;
         let startX;
         let scrollLeft;
+        let lastX;
+        let animationFrame;
 
         gallery.addEventListener("mousedown", (e) => {
             isDragging = true;
             startX = e.pageX - gallery.offsetLeft;
             scrollLeft = gallery.scrollLeft;
             gallery.style.cursor = 'grabbing';
-        });
+            lastX = e.pageX;
+            cancelAnimationFrame(animationFrame);
+        }, { passive: true });
 
         gallery.addEventListener("mouseleave", () => {
             isDragging = false;
             gallery.style.cursor = 'grab';
-        });
+        }, { passive: true });
 
         gallery.addEventListener("mouseup", () => {
             isDragging = false;
             gallery.style.cursor = 'grab';
-        });
+        }, { passive: true });
 
         gallery.addEventListener("mousemove", (e) => {
             if (!isDragging) return;
-            e.preventDefault();
-            const x = e.pageX - gallery.offsetLeft;
-            const walk = (x - startX) * 2;
-            gallery.scrollLeft = scrollLeft - walk;
-        });
+            lastX = e.pageX;
+            
+            // Use requestAnimationFrame for smoother scrolling
+            cancelAnimationFrame(animationFrame);
+            animationFrame = requestAnimationFrame(() => {
+                const x = lastX - gallery.offsetLeft;
+                const walk = (x - startX) * 2;
+                gallery.scrollLeft = scrollLeft - walk;
+            });
+        }, { passive: true });
     };
 
     // New function to initialize gallery with proper dimensions
@@ -321,7 +393,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const galleryContainerHeight = window.innerHeight;
         const galleryHeight = galleryContainerHeight * 0.75; // 75vh
         
-        document.querySelector('.gallery-container').style.height = `${galleryContainerHeight}px`;
+        const galleryContainer = document.querySelector('.gallery-container');
+        if (galleryContainer) {
+            galleryContainer.style.height = `${galleryContainerHeight}px`;
+        }
+        
         gallery.style.height = `${galleryHeight}px`;
         
         // Setup gallery structure
@@ -357,8 +433,8 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
-        // Handle window resize events
-        window.addEventListener("resize", () => {
+        // Debounced resize handler
+        window.addEventListener("resize", debounce(() => {
             adjustWidth();
             
             // Update gallery height on resize
@@ -370,7 +446,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     item.style.height = `${galleryHeight}px`;
                 });
             }
-        });
+        }, 100));
         
         // Handle orientation change events specifically
         window.addEventListener("orientationchange", () => {
@@ -391,7 +467,7 @@ document.addEventListener("DOMContentLoaded", () => {
             initializeGallery();
         }
         
-        // Set up transitions after everything else
+        // Set up transitions after everything else - with delay
         setTimeout(setupImageTransitions, 1500);
     };
 
@@ -408,18 +484,33 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// Fix for global mousemove event
-document.addEventListener('mousemove', (e) => {
-    const customCursor = document.getElementById('custom-cursor');
-    if (customCursor) {
-        customCursor.style.left = `${e.clientX}px`;
-        customCursor.style.top = `${e.clientY}px`;
-    }
-
-    // Mover el cursor de respaldo (fallback)
-    const fallbackCursor = document.getElementById('cursor-fallback');
-    if (fallbackCursor) {
-        fallbackCursor.style.left = `${e.clientX}px`;
-        fallbackCursor.style.top = `${e.clientY}px`;
-    }
-});
+// Optimized global mousemove event handler
+(function() {
+    let ticking = false;
+    let lastX = 0;
+    let lastY = 0;
+    
+    document.addEventListener('mousemove', (e) => {
+        lastX = e.clientX;
+        lastY = e.clientY;
+        
+        if (!ticking) {
+            requestAnimationFrame(() => {
+                const customCursor = document.getElementById('custom-cursor');
+                if (customCursor) {
+                    customCursor.style.left = `${lastX}px`;
+                    customCursor.style.top = `${lastY}px`;
+                }
+                
+                const fallbackCursor = document.getElementById('cursor-fallback');
+                if (fallbackCursor) {
+                    fallbackCursor.style.left = `${lastX}px`;
+                    fallbackCursor.style.top = `${lastY}px`;
+                }
+                
+                ticking = false;
+            });
+            ticking = true;
+        }
+    }, { passive: true });
+})();
