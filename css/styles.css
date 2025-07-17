@@ -345,6 +345,7 @@ a, button, .image, .image-transition-wrapper {
     }
 
     html, body {
+            overflow-x: hidden !important;
         overflow-y: hidden !important;
        
     }
