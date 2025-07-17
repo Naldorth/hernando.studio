@@ -37,7 +37,6 @@ body {
 }
 
 .intro-title {
-    position: absolute;
     font-size: clamp(2rem, 6vw, 6rem);
     padding: 1rem 2rem;
     border-radius: 1rem;
@@ -45,6 +44,7 @@ body {
     opacity: 0;
     transition: opacity 12s ease-in-out !important;
     cursor: none !important;
+    text-align: center;
 }
 
 .hidden {
@@ -62,7 +62,7 @@ header {
     padding: 1.5rem;
     background-color: rgba(255, 255, 255, 1);
     z-index: 10;
-    pointer-events: none !important; /* Crucial fix */
+    pointer-events: none !important;
     cursor: none !important;
 }
 
@@ -73,7 +73,6 @@ header {
     right: 6rem;
     cursor: none !important;
     pointer-events: auto !important;
-  
 }
 
 .info-btn, .close-info {
@@ -241,13 +240,10 @@ a:hover + #custom-cursor,
     transform: translate(-50%, -50%) scale(1.5);
 }
 
-/* Remove the problematic global cursor rule and replace with specific ones */
 a, button, .image, .image-transition-wrapper {
     cursor: none !important;
 }
 
-
-/* More specific selectors */
 .gallery::-webkit-scrollbar,
 .gallery-container .gallery::-webkit-scrollbar {
   width: 0 !important;
@@ -264,10 +260,8 @@ a, button, .image, .image-transition-wrapper {
 }
 
 @media (max-width: 1000px) and (orientation: landscape){
-
-    /* 2. Hacer que el panel de info solo se vea cuando está activo */
     .info-panel {
-      left: -100% !important; /* oculto por defecto */
+      left: -100% !important;
       z-index: 20 !important;
     }
   
@@ -276,23 +270,21 @@ a, button, .image, .image-transition-wrapper {
       width: 100vw !important;
       height: 100vh !important;
       z-index: 9999 !important;
-
     }
     .info-panel p {
-        margin-bottom: 1em; /* Espacio entre todos los párrafos */
-        line-height: 1.6; /* Mejora la legibilidad */
+        margin-bottom: 1em;
+        line-height: 1.6;
         margin-right: 2.5rem;
     }
 
-    /* 3. Ocultar el cursor personalizado */
     #custom-cursor {
       display: none !important;
     }
-  
+
     body {
       cursor: default !important;
     }
-  
+
     .gallery {
         margin-top: 2vh;
         gap: 2rem;
@@ -300,86 +292,64 @@ a, button, .image, .image-transition-wrapper {
         height: 75vh;
         cursor: none !important;
     }
-  
+
     header {
       position: relative !important;
       pointer-events: auto !important;
       cursor: auto !important;
       z-index: 10;
     }
+
     html, body {
         overflow-x: hidden !important;
         overflow-y: hidden !important;
-      }
-      
-      .intro-title {
-        position: absolute;
-        font-size: clamp(2rem, 6vw, 6rem);
-        padding: 1rem 2rem;
-        border-radius: 1rem;
-        color: black;
-        opacity: 0;
-        transition: opacity 12s ease-in-out !important;
-        cursor: none !important;
     }
+}
 
-  }
-  
-  @media (max-width: 767px) {
-
-    /* 2. Hacer que el panel de info solo se vea cuando está activo */
+@media (max-width: 767px) {
     .info-panel {
-      left: -100% !important; /* oculto por defecto */
+      left: -100% !important;
       z-index: 20 !important;
     }
-  
+
     .info-panel.active {
       left: 0 !important;
       width: 100vw !important;
       height: 100vh !important;
       z-index: 9999 !important;
-
     }
+
     .info-panel p {
-        margin-bottom: 1em; /* Espacio entre todos los párrafos */
-        line-height: 1.6; /* Mejora la legibilidad */
+        margin-bottom: 1em;
+        line-height: 1.6;
         margin-right: 2.5rem;
     }
 
-    /* 3. Ocultar el cursor personalizado */
     #custom-cursor {
       display: none !important;
     }
-  
+
     body {
       cursor: default !important;
     }
-  
- .gallery-container {
-    top: 45vh;
- }
-  
+
+    .gallery-container {
+        top: 45vh;
+    }
+
     header {
       position: relative !important;
       pointer-events: auto !important;
       cursor: auto !important;
       z-index: 10;
     }
+
     html, body {
         overflow-x: hidden !important;
         overflow-y: hidden !important;
-      }
-      .intro-title {
-        position: absolute;
-        font-size: clamp(2rem, 6vw, 6rem);
-        padding: 1rem 2rem;
-        border-radius: 1rem;
-        color: black;
-        opacity: 0;
-        transition: opacity 12s ease-in-out !important;
-        cursor: none !important;
     }
-  }
+}
+
   
   
   
