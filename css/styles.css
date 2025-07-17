@@ -311,6 +311,18 @@ a, button, .image, .image-transition-wrapper {
         overflow-x: hidden !important;
         overflow-y: hidden !important;
       }
+      
+      .intro-title {
+        position: absolute;
+        font-size: clamp(2rem, 6vw, 6rem);
+        padding: 1rem 2rem;
+        border-radius: 1rem;
+        color: black;
+        opacity: 0;
+        transition: opacity 12s ease-in-out !important;
+        cursor: none !important;
+    }
+
   }
   
   @media (max-width: 767px) {
@@ -357,6 +369,17 @@ a, button, .image, .image-transition-wrapper {
         overflow-x: hidden !important;
         overflow-y: hidden !important;
       }
+      .intro-title {
+        position: absolute;
+        font-size: clamp(2rem, 6vw, 6rem);
+        padding: 1rem 2rem;
+        border-radius: 1rem;
+        color: black;
+        opacity: 0;
+        transition: opacity 12s ease-in-out !important;
+        cursor: none !important;
+    }
   }
+  
   
   
