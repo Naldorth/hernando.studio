@@ -38,9 +38,9 @@ body {
 
 .intro-title {
     position: absolute;
-    font-size: 6rem;
-    padding: 10px 20px;
-    border-radius: 10px;
+    font-size: clamp(2rem, 6vw, 6rem);
+    padding: 1rem 2rem;
+    border-radius: 1rem;
     color: black;
     opacity: 0;
     transition: opacity 12s ease-in-out !important;
@@ -59,7 +59,7 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px;
+    padding: 1.5rem;
     background-color: rgba(255, 255, 255, 1);
     z-index: 10;
     pointer-events: none !important; /* Crucial fix */
@@ -69,27 +69,27 @@ header {
 .logo {
     font-size: 1.5rem;
     position: absolute;
-    top: 30px;
-    right: 70px;
+    top: 2rem;
+    right: 6rem;
     cursor: none !important;
     pointer-events: auto !important;
   
 }
 
 .info-btn, .close-info {
-    font-size: 2rem;
+    font-size: clamp(1.5rem, 3vw, 2rem);
     background: none;
     border: none;
     color: black;
     cursor: none !important;
     position: absolute;
-    top: 20px;
+    top: 1.8rem;
     pointer-events: auto !important;
     z-index: 11;
 }
 
 .info-btn {
-    left: 25px;
+    left: 1.5rem;
     z-index: 30;
 }
 
@@ -107,7 +107,7 @@ header {
     justify-content: center;
     transition: left 0.5s ease;
     z-index: 20;
-    padding: 30px;
+    padding: 2rem;
     cursor: none !important;
 }
 
@@ -116,7 +116,7 @@ header {
 }
 
 .close-info {
-    left: 20px;
+    left: 1.25rem;
 }
 
 .info-panel p.contact a,
@@ -154,9 +154,9 @@ header {
 
 .gallery {
     display: flex;
-    margin-top: 160px;
-    gap: 20px;
-    padding: 30px;
+    margin-top: 15vh;
+    gap: 2rem;
+    padding: 2rem;
     height: 75vh;
     cursor: none !important;
 }
@@ -358,4 +358,5 @@ a, button, .image, .image-transition-wrapper {
         overflow-y: hidden !important;
       }
   }
+  
   
