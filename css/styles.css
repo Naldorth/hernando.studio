@@ -262,3 +262,100 @@ a, button, .image, .image-transition-wrapper {
   overflow-x: auto !important;
   overflow-y: hidden !important;
 }
+
+@media (max-width: 1000px) and (orientation: landscape){
+
+    /* 2. Hacer que el panel de info solo se vea cuando está activo */
+    .info-panel {
+      left: -100% !important; /* oculto por defecto */
+      z-index: 20 !important;
+    }
+  
+    .info-panel.active {
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      z-index: 9999 !important;
+
+    }
+    .info-panel p {
+        margin-bottom: 1em; /* Espacio entre todos los párrafos */
+        line-height: 1.6; /* Mejora la legibilidad */
+        margin-right: 2.5rem;
+    }
+
+    /* 3. Ocultar el cursor personalizado */
+    #custom-cursor {
+      display: none !important;
+    }
+  
+    body {
+      cursor: default !important;
+    }
+  
+    .gallery {
+        margin-top: 2vh;
+        gap: 2rem;
+        padding: 2rem;
+        height: 75vh;
+        cursor: none !important;
+    }
+  
+    header {
+      position: relative !important;
+      pointer-events: auto !important;
+      cursor: auto !important;
+      z-index: 10;
+    }
+    html, body {
+        overflow-x: hidden !important;
+        overflow-y: hidden !important;
+      }
+  }
+  
+  @media (max-width: 767px) {
+
+    /* 2. Hacer que el panel de info solo se vea cuando está activo */
+    .info-panel {
+      left: -100% !important; /* oculto por defecto */
+      z-index: 20 !important;
+    }
+  
+    .info-panel.active {
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      z-index: 9999 !important;
+
+    }
+    .info-panel p {
+        margin-bottom: 1em; /* Espacio entre todos los párrafos */
+        line-height: 1.6; /* Mejora la legibilidad */
+        margin-right: 2.5rem;
+    }
+
+    /* 3. Ocultar el cursor personalizado */
+    #custom-cursor {
+      display: none !important;
+    }
+  
+    body {
+      cursor: default !important;
+    }
+  
+ .gallery-container {
+    top: 45vh;
+ }
+  
+    header {
+      position: relative !important;
+      pointer-events: auto !important;
+      cursor: auto !important;
+      z-index: 10;
+    }
+    html, body {
+        overflow-x: hidden !important;
+        overflow-y: hidden !important;
+      }
+  }
+  
